@@ -86,10 +86,7 @@ int main(int argc, char* argv[]) {
 
 
 
-        // SDL_GetWindowSize(window, &w, &h);
-        // scale = (float)h/(float)HEIGHT;
-        // SDL_SetWindowSize(window, (float)WIDTH * scale, (float)HEIGHT * scale);
-        // SDL_SetRenderScale(renderer, scale, scale);
+
 
         ImGui_ImplSDLRenderer3_NewFrame();
         ImGui_ImplSDL3_NewFrame();
@@ -113,8 +110,9 @@ int main(int argc, char* argv[]) {
 
         // render ImGui
         ImGui_ImplSDLRenderer3_RenderDrawData(ImGui::GetDrawData(), renderer);
+
         SDL_RenderPresent(renderer);
-        // SDL_SetRenderLogicalPresentation(renderer, w, h, SDL_LOGICAL_PRESENTATION_STRETCH);
+        //SDL_SetRenderLogicalPresentation(renderer, w, h, SDL_LOGICAL_PRESENTATION_STRETCH);
         
         SDL_GetMouseState(&mousePos[0], &mousePos[1]);  
 
