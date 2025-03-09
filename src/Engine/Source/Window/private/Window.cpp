@@ -1,4 +1,5 @@
-#include "../public/window.hpp"
+#include "../public/Window.hpp"
+
 
 Engine::Window::Window(const char* title, int w, int h, int flags) {
     if(flags != 0) {
@@ -11,7 +12,10 @@ Engine::Window::Window(const char* title, int w, int h, int flags) {
         failed = true;
         SDL_Quit();
     }
-    if(failed) return;
+    if(failed) {
+        Engine::Debug::ThrowError("Failed to create window!", GET_MACRO(WINDOW_FAILED_TO_CREATE_WINDOW));
+        return;
+    }
     SDL_SetWindowMinimumSize(sdlWindow, 300, 300);
 
 }

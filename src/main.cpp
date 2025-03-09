@@ -1,17 +1,20 @@
 #include <iostream>
 #include <string>
-#include "../include/imgui-docking/imgui.h"
-#include "../include/imgui-docking/imgui_impl_sdl3.h"
-#include "../include/imgui-docking/imgui_impl_sdlrenderer3.h"
+#include "Engine/external/include/imgui-docking/imgui.h"
+#include "Engine/external/include/imgui-docking/imgui_impl_sdl3.h"
+#include "Engine/external/include/imgui-docking/imgui_impl_sdlrenderer3.h"
 #include <SDL3/SDL.h>
-#define SDL_STBIMAGE_IMPLEMENTATION
-#include "../include/SDL_stbimage.h"
+#include "Engine/external/include/SDL_stbimage.h"
 #define ENGINE_IMPL_WINDOW
-#include "Engine/engine.hpp"
+#define ENGINE_IMPL_DEVGUI
+#include "Engine/Engine.hpp"
 
 
-#define WIDTH 1920
-#define HEIGHT 1080
+
+
+void test() {
+    // whatever
+}
 
 int main(int argc, char* argv[]) {
 
@@ -19,7 +22,7 @@ int main(int argc, char* argv[]) {
 
     // Init SDL, if it fails, end the program.
     if(Engine::Core::Init() != ENGINE_SUCCESS) {
-        return 1;
+        return Engine::Debug::GetError();
     }
 
     // Create window, if it fails, quit SDL and end the program.
@@ -39,7 +42,7 @@ int main(int argc, char* argv[]) {
 
     float div = 0.25f;
 
-    SDL_Surface* surface = STBIMG_Load("assets/image.png");
+    SDL_Surface* surface = STBIMG_Load("assets/SkelebyteSkull_NoBackground.png");
     SDL_Texture* image = SDL_CreateTextureFromSurface(renderer, surface);
     SDL_DestroySurface(surface);
 
@@ -52,17 +55,11 @@ int main(int argc, char* argv[]) {
     SDL_SetRenderTarget(renderer, NULL);
 
     // Create ImGui
-    IMGUI_CHECKVERSION();
-    ImGui::CreateContext();
-    ImGuiIO& io = ImGui::GetIO(); (void)io;
-    ImGui::GetIO().ConfigFlags |= ImGuiConfigFlags_DockingEnable;
-    ImGui_ImplSDL3_InitForSDLRenderer(window->sdlWindow, renderer);
-    ImGui_ImplSDLRenderer3_Init(renderer);
-    ImGuiStyle& style = ImGui::GetStyle();
+    Engine::DevGui* devGui = new Engine::DevGui(window, renderer);
+    ImGuiStyle& style = devGui->GetStyle();
 
+    devGui->draw = test;
 
-
-    
 
     int w;
     int h;
@@ -71,24 +68,14 @@ int main(int argc, char* argv[]) {
 
 
 
-    bool debug = true;
-    bool rounded = true;
-    float rounding = 5.0f;
+
 
 
     bool running = true;
-    int targetFPS = 60;
-    int frameDelay = 100 / targetFPS;
 
-    int frameStart;
-    float deltaTime;
-    int frames = 0;
-    int fps;
 
     while(running) {
-        frameDelay = 1000 / targetFPS;
-        frameStart = SDL_GetTicks();
-        frames++;
+        Engine::Core::BeginFrame();
         SDL_Event e;
         while(SDL_PollEvent(&e)) {
             if(e.type == SDL_EVENT_QUIT) {
@@ -109,30 +96,8 @@ int main(int argc, char* argv[]) {
         ImGui::NewFrame();
         ImGui::DockSpaceOverViewport(0, NULL, ImGuiDockNodeFlags_PassthruCentralNode);
 
-        ImGui::Begin("Settings");
-        ImGui::Text("Project Settings");
-        if(ImGui::Button("Toggle Debug Window")) {
-            debug = !debug;
-        }
-        ImGui::Text("ImGui Settings");
-        if(ImGui::Button("Toggle Rounding")) {
-            rounded = !rounded;
-        }
-        ImGui::SliderFloat("Rounding amount", &rounding, 5.0f, 15.0f);
-        ImGui::End();
+        devGui->EngineGUI(style, Engine::Core::FPS());
 
-        ImGui::Begin("Inspector");
-        ImGui::Text("Object Name");
-        ImGui::Text("this is my image");
-        ImGui::End();
-
-        if(debug) {
-            ImGui::Begin("Debug");
-            ImGui::DragInt("Target Fps", &targetFPS, 1.0f, 1, 200);
-            ImGui::DragInt("Frames Per Second", &fps, ImGuiInputTextFlags_ReadOnly);
-            ImGui::InputFloat2("Mouse Position", mousePos);
-            ImGui::End();
-        }
 
         ImGui::Render();
 
@@ -150,46 +115,15 @@ int main(int argc, char* argv[]) {
         ImGui_ImplSDLRenderer3_RenderDrawData(ImGui::GetDrawData(), renderer);
         SDL_RenderPresent(renderer);
         // SDL_SetRenderLogicalPresentation(renderer, w, h, SDL_LOGICAL_PRESENTATION_STRETCH);
-
-        deltaTime = SDL_GetTicks() - frameStart; 
-
-
-
-        if(rounded) {
-            style.TabRounding = rounding;
-            style.FrameRounding = rounding;
-            style.GrabRounding = rounding;
-            style.WindowRounding = rounding;
-            style.PopupRounding = rounding;
-            style.ChildRounding = rounding;
-            style.ScrollbarRounding = rounding;
-        } else {
-            style.TabRounding = 0.0f;
-            style.FrameRounding = 0.0f;
-            style.GrabRounding = 0.0f;
-            style.WindowRounding = 0.0f;
-            style.PopupRounding = 0.0f; 
-            style.ChildRounding = 0.0f;
-            style.ScrollbarRounding = 0.0f;
-        }
-
-
-
-        SDL_GetMouseState(&mousePos[0], &mousePos[1]);    
         
-        if(frameDelay > deltaTime) {
-            if(frames > targetFPS) {
-                fps = frames - 1;
-                frames = 0;
-            }
-            SDL_Delay(frameDelay - deltaTime);
-        }
+        SDL_GetMouseState(&mousePos[0], &mousePos[1]);  
+
+
+        Engine::Core::EndFrame();
     }
 
-    ImGui_ImplSDLRenderer3_Shutdown();
-    ImGui_ImplSDL3_Shutdown();
-    ImGui::DestroyContext();
-    window->~Window();
+
+   
     SDL_DestroyTexture(texture);
     SDL_DestroyRenderer(renderer);
     SDL_Quit();
