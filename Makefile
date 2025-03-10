@@ -4,7 +4,7 @@ BUILD_DIR = build
 ENGINE_DIR = src/Engine
 
 LINUX_FLAGS = -lSDL3 -lpthread -lm -ldl 
-WIN_FLAGS = -I$(ENGINE_DIR)/external/include/SDL3 -L$(ENGINE_DIR)/external/lib -lSDL3
+WIN_FLAGS = -I$(ENGINE_DIR)/external/include -L$(ENGINE_DIR)/external/lib -lSDL3
 
 ENGINE_SRC = $(wildcard $(ENGINE_DIR)/Source/*/private/*.cpp)
 SRC = $(wildcard src/*.cpp) $(wildcard  $(ENGINE_DIR)/external/imgui-docking/*.cpp)
