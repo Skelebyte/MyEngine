@@ -28,7 +28,7 @@ int main(int argc, char* argv[]) {
     // Create window, if it fails, quit SDL and end the program.
     Engine::Window* window = new Engine::Window("Engine", 1280, 720);
     if(window->Failed()) {
-        return 2;
+        return Engine::Debug::GetError();;
     }
 
     // Create renderer, if it fails, quit SDL, close the window, and end the program.
@@ -121,7 +121,7 @@ int main(int argc, char* argv[]) {
     }
 
 
-   
+
     SDL_DestroyTexture(texture);
     SDL_DestroyRenderer(renderer);
     SDL_Quit();
